@@ -1,0 +1,35 @@
+package FoodTruckFinder::Model::FoodTruck;
+use Moo;
+use Types::Standard qw(Int Str Num Maybe);
+
+has location_id              => (is => 'ro', isa => Maybe[Int], default => sub { undef });
+has applicant                => (is => 'ro', isa => Str);
+has facility_type            => (is => 'ro', isa => Str);
+has cnn                      => (is => 'ro', isa => Int);
+has location_description     => (is => 'ro', isa => Str);
+has address                  => (is => 'ro', isa => Str);
+has blocklot                 => (is => 'ro', isa => Str);
+has block                    => (is => 'ro', isa => Str);
+has lot                      => (is => 'ro', isa => Str);
+has permit                   => (is => 'ro', isa => Str);
+has status                   => (is => 'ro', isa => Str);
+has food_items               => (is => 'ro', isa => Str);
+has x                        => (is => 'ro', isa => Num);
+has y                        => (is => 'ro', isa => Num);
+has latitude                 => (is => 'ro', isa => Num);
+has longitude                => (is => 'ro', isa => Num);
+has schedule                 => (is => 'ro', isa => Maybe[Str]);
+has dayshours                => (is => 'ro', isa => Maybe[Str]);
+has NOISent                  => (is => 'ro', isa => Maybe[Str]);
+has approved                 => (is => 'ro', isa => Maybe[Str]);
+has received                 => (is => 'ro', isa => Maybe[Str]);
+has prior_permit             => (is => 'ro', isa => Maybe[Str]);
+has expiration_date          => (is => 'ro', isa => Maybe[Str]);
+has location                 => (is => 'ro', isa => Maybe[Str]);
+has fire_prevention_districts => (is => 'ro', isa => Maybe[Int]);
+has police_districts         => (is => 'ro', isa => Maybe[Int]);
+has supervisor_districts     => (is => 'ro', isa => Maybe[Int]);
+has zip_codes                => (is => 'ro', isa => Maybe[Int]);
+has neighborhoods_old        => (is => 'ro', isa => Maybe[Int]);
+
+1;

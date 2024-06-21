@@ -1,0 +1,13 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Mojo::File qw(curfile);
+use lib curfile->dirname->sibling('lib')->to_string;
+use Mojolicious::Commands;
+
+use FoodTruckFinder;
+
+# Start API server
+Mojolicious::Commands->start_app('FoodTruckFinder');

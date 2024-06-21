@@ -1,0 +1,9 @@
+% my $msg = 'Welcome to the Estee Lauder Food Truck Finder!';
+<!DOCTYPE html>
+<html>
+  <head><title>Welcome to the Estee Lauder Food Truck Finder!</title></head>
+  <body>
+    <h1><%= $msg %></h1>
+    <p>This is a placeholder webpage for the Food Truck Finder API</p>
+  </body>
+</html>
