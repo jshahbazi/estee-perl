@@ -7,11 +7,42 @@ use Geo::Distance;
 use FoodTruckFinder::Database;
 use Data::Dump qw(dump);
 
+use Mojo::UserAgent;
+use Mojo::URL;
+use Mojo::JSON qw(decode_json);
+
 my $db_file = "food_trucks.db";
-my $geolocator = Geo::Coder::OSM->new();
+my $db = FoodTruckFinder::Database->new($db_file);
+
 my $geo = Geo::Distance->new();
 
-my $db = FoodTruckFinder::Database->new($db_file);
+sub geocode {
+    my ($address) = @_;
+    my $ua = Mojo::UserAgent->new;
+    
+    my $url = Mojo::URL->new('https://nominatim.openstreetmap.org/search');
+    $url->query(format => 'json', q => $address, limit => 1);
+
+    my $tx = $ua->get($url);
+    if (my $res = $tx->result) {
+        if ($res->is_success) {
+            my $data = decode_json($res->body);
+            if (@$data) {
+                return {
+                    lat => $data->[0]{lat},
+                    lon => $data->[0]{lon}
+                };
+            }
+        } else {
+            warn "HTTP request failed: ", $res->code, " ", $res->message;
+        }
+    } else {
+        my $err = $tx->error;
+        warn "Connection error: $err->{message}";
+    }
+    return undef;
+}
+
 
 sub _connect_db {
   my $dbh = DBI->connect("dbi:SQLite:dbname=$db_file","","");
@@ -158,15 +189,17 @@ sub get_food_truck_items {
 sub find_closest_food_trucks {
   my $self = shift;
   my $address = $self->param('address');
-  
+  dump($address);
   eval {
       my @results = $db->get_all_food_trucks();
+      
       if (!@results) {
           $self->render(json => {error => 'Food trucks not found'}, status => 404);
           return;
       }
 
-      my $location = $geolocator->geocode(location => $address);
+      my $location = geocode($address);
+      warn "Location:-",dump($location),"-";
       if (!$location) {
           $self->render(json => {error => 'Invalid address'}, status => 400);
           return;

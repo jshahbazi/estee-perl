@@ -244,4 +244,17 @@ $t->delete_ok('/food_trucks/1')
 $t->get_ok('/food_trucks/1')
   ->status_is(404);
 
+# Test 1: Valid address
+$t->get_ok('/food_trucks/closest?address=227 BUSH ST, San Francisco, CA 94104')
+  ->status_is(200);
+  # ->json_is('/0/location_id', 1585965)
+  # ->json_is('/0/applicant', 'Curry Up Now');
+
+# Test 2: Invalid address
+$t->get_ok('/food_trucks/closest?address=Invalid Address')
+  ->status_is(400)
+  ->json_is('/error', 'Invalid address');
+
+
+
 done_testing();
