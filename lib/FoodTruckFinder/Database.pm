@@ -191,7 +191,7 @@ sub get_all_food_trucks {
     }
 
     $dbh->disconnect();
-    return \@results;
+    return @results;
 }
 
 sub get_food_truck_by_id {

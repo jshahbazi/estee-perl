@@ -10,11 +10,21 @@ use Data::Dump qw(dump);
 use Mojo::UserAgent;
 use Mojo::URL;
 use Mojo::JSON qw(decode_json);
+use Mojo::JSON qw(to_json);
+use Scalar::Util qw(blessed);
 
 my $db_file = "food_trucks.db";
 my $db = FoodTruckFinder::Database->new($db_file);
 
 my $geo = Geo::Distance->new();
+
+sub dump_to_file {
+    my ($data, $filename) = @_;
+    
+    open my $fh, '>', $filename or die "Could not open file '$filename' $!";
+    print $fh dump($data);
+    close $fh;
+}
 
 sub geocode {
     my ($address) = @_;
@@ -189,31 +199,103 @@ sub get_food_truck_items {
 sub find_closest_food_trucks {
   my $self = shift;
   my $address = $self->param('address');
-  dump($address);
+
   eval {
-      my @results = $db->get_all_food_trucks();
-      
-      if (!@results) {
-          $self->render(json => {error => 'Food trucks not found'}, status => 404);
-          return;
+      my @food_trucks = $db->get_all_food_trucks();
+      if (!@food_trucks) {
+          return $self->render(json => {error => 'Food trucks not found'}, status => 404);
       }
 
       my $location = geocode($address);
-      warn "Location:-",dump($location),"-";
       if (!$location) {
-          $self->render(json => {error => 'Invalid address'}, status => 400);
-          return;
+          return $self->render(json => {error => 'Invalid address'}, status => 400);
       }
 
       my @distances;
-      foreach my $truck (@results) {
-          my $distance = $geo->distance('kilometer', $location->{lat}, $location->{lon}, $truck->latitude, $truck->longitude);
-          push @distances, { distance => $distance, truck => $truck };
+      # dump_to_file(@food_trucks, 'food_trucks_dump.txt');
+
+      for my $food_truck (@food_trucks) {
+        # foreach my $food_truck (@$outer_array) {
+          my ($latitude, $longitude, $applicant, $address, $facility_type, $food_items, $status, $schedule, $dayshours, $location_description);
+          
+          if (blessed($food_truck) && $food_truck->isa('FoodTruckFinder::Model::FoodTruck')) {
+              #  dump($food_truck);
+              # It's a blessed FoodTruckFinder::Model::FoodTruck object
+              $latitude = $food_truck->latitude;
+              $longitude = $food_truck->longitude;
+              $applicant = $food_truck->applicant;
+              # dump($food_truck->applicant);
+              $address = $food_truck->address;
+              $facility_type = $food_truck->facility_type;
+              $food_items = $food_truck->food_items;
+              $status = $food_truck->status;
+              $schedule = $food_truck->schedule;
+              $dayshours = $food_truck->dayshours;
+              $location_description = $food_truck->location_description;
+          } elsif (ref($food_truck) eq 'HASH') {
+              # dump("Unblessed hash");
+              # It's an unblessed hash reference
+              $latitude = $food_truck->{latitude};
+              $longitude = $food_truck->{longitude};
+              $applicant = $food_truck->{applicant};
+              $address = $food_truck->{address};
+              $facility_type = $food_truck->{facility_type};
+              $food_items = $food_truck->{food_items};
+              $status = $food_truck->{status};
+              $schedule = $food_truck->{schedule};
+              $dayshours = $food_truck->{dayshours};
+              $location_description = $food_truck->{location_description};
+          } else {
+              dump($food_truck);
+              warn "Unknown food truck format";
+          }
+
+          my $distance = $geo->distance('mile', 
+                                $location->{lon}, $location->{lat}, 
+                                $longitude, $latitude);
+          # dump($distance);
+          # dump($applicant);
+
+          push @distances, { 
+              distance => $distance, 
+              truck => {
+                  applicant => $applicant,
+                  address => $address,
+                  food_items => $food_items,
+                  latitude => $latitude,
+                  longitude => $longitude,
+                  schedule => $schedule,
+                  status => $status
+              }
+          }
+      # }
       }
 
       @distances = sort { $a->{distance} <=> $b->{distance} } @distances;
-      my @closest_trucks = map { $_->{truck} } @distances[0..2];
-      $self->render(json => \@closest_trucks);
+      my @closest_trucks = @distances[0..2];    
+
+      # dump_to_file(\@distances, 'distances.txt');
+      # dump_to_file(\@closest_trucks, 'closest_trucks.txt');
+
+      dump($location->{lat});
+      dump($location->{lon});
+
+      $self->render(json => {
+          source_address => $address,
+          source_coordinates => {
+              latitude => $location->{lat},
+              longitude => $location->{lon}
+          },
+          closest_trucks => \@closest_trucks
+      });
+
+      # return $self->render(json => { error => 'Internal server error' }, status => 500);
+
+
+  };
+  if ($@) {
+      $self->app->log->error("Error in find_closest_food_trucks: $@");
+      $self->render(json => {error => 'Internal server error'}, status => 500);
   }
 }
 
