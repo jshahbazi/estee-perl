@@ -27,9 +27,9 @@ ok($db->create_table(), 'create_table method works');
 ok($db->create_database($csv_file), 'create_database method works');
 
 # Test fetching all food trucks
-my $food_trucks = $db->get_all_food_trucks();
-is(scalar @$food_trucks, 481, 'get_all_food_trucks returns correct number of trucks');
-is($food_trucks->[0]->applicant, 'The Chai Cart', 'get_all_food_trucks returns correct data');
+my @food_trucks = $db->get_all_food_trucks();
+is(scalar @food_trucks, 481, 'get_all_food_trucks returns correct number of trucks');
+is($food_trucks[0]->applicant, 'The Chai Cart', 'get_all_food_trucks returns correct data');
 
 # Test fetching a food truck by ID
 my $food_truck = $db->get_food_truck_by_id(755221);
