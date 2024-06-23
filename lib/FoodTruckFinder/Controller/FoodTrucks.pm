@@ -96,7 +96,6 @@ sub get_food_truck_by_name {
 
   eval {
       my @results = $db->get_food_truck_by_name($name);
-      # dump(@results);
       if (@results) {
           # warn "Found food truck by  name:", @results;
           $self->render(json => \@results);
@@ -136,12 +135,8 @@ sub update_food_truck {
   my $location_id = $self->param('location_id');
   my $data = $self->req->json;
 
-  # dump($data);
-
-  # return $self->render(json => {status => 'ok', message => 'Test'}, status => 200);
   eval {
       my $result = $db->update_food_truck($location_id, $data);
-      # warn "Result:-",$result,"-";
       if ($result) {
           return $self->render(json => {status => 'success', message => 'Food truck updated successfully'}, status => 200);
       } else {
@@ -253,8 +248,6 @@ sub find_closest_food_trucks {
           my $distance = $geo->distance('mile', 
                                 $location->{lon}, $location->{lat}, 
                                 $longitude, $latitude);
-          # dump($distance);
-          # dump($applicant);
 
           push @distances, { 
               distance => $distance, 
@@ -277,9 +270,6 @@ sub find_closest_food_trucks {
       # dump_to_file(\@distances, 'distances.txt');
       # dump_to_file(\@closest_trucks, 'closest_trucks.txt');
 
-      dump($location->{lat});
-      dump($location->{lon});
-
       $self->render(json => {
           source_address => $address,
           source_coordinates => {
@@ -288,10 +278,6 @@ sub find_closest_food_trucks {
           },
           closest_trucks => \@closest_trucks
       });
-
-      # return $self->render(json => { error => 'Internal server error' }, status => 500);
-
-
   };
   if ($@) {
       $self->app->log->error("Error in find_closest_food_trucks: $@");
