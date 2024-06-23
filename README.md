@@ -244,3 +244,14 @@ Example response:
 - `t/`: Test files
 - `script/estee-perl`: Application script
 
+## Design Thoughts
+
+- Overall this wasn't as difficult as I thought it would be.  Of course, the Mojolicious library really did all the work, but that's a good thing - at the very least it shows that there are modern libraries for Perl (which I didn't think there were).  I followed the same approach as I did in my Python version: https://github.com/jshahbazi/estee, and really the only thing that gave me trouble was getting the array vs scalar references and everything that goes with them.  I wasn't surprised by it - this harkens back to older systems languages so it makes sense that it's there.  We've gotten spoiled over the years with languages like Python.
+
+- I probably should have put stuff in the config and loaded it in each file.
+
+- I included a couple of test scripts in the script/ directory 
+
+- The Test::Mojo module made things surprisingly easy for tests.  Overall the tests were probably the easiest part of it, and the most helpful, of course.  One thing to note that is a little hacky is that for the api.t testing, I launch a full application which creates a real database and all that.
+
+- The routing tripped me up a little bit at first because I originally wasn't using 'under'.  It would match under the first possible path and just hang.  FastAPI in Python got me a little spoiled on how easy it is to work with, but once I learned about using 'under', then it was a lot easier.
