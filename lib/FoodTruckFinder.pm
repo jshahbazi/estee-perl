@@ -1,7 +1,6 @@
 package FoodTruckFinder;
 use Mojo::Base 'Mojolicious';
 use File::Spec;
-use File::Basename qw(dirname basename);
 use FoodTruckFinder::Database;
 
 sub startup () {
@@ -26,18 +25,15 @@ sub startup () {
   my $r = $self->routes;
 
   # API routes  
-  # The gets all u
+  # Use 'under' to group all the routes otherwise it will match the first one and stop
   $r->under('/food_trucks')->get('/')->to(controller => 'FoodTrucks', action => 'get_food_trucks');
   $r->under('/food_trucks')->get('/by_name')->to(controller => 'FoodTrucks', action => 'get_food_truck_by_name');
   $r->under('/food_trucks')->get('/closest')->to(controller => 'FoodTrucks', action => 'find_closest_food_trucks');
   $r->under('/food_trucks')->get('/:location_id/applicant_fooditems')->to(controller => 'FoodTrucks', action => 'get_food_truck_items');  
   $r->under('/food_trucks')->get('/:location_id')->to(controller => 'FoodTrucks', action => 'get_food_truck_by_id');
-
-  $r->get('/food_trucks/:location_id/applicant_fooditems')->to(controller => 'FoodTrucks', action => 'get_food_truck_items');
-  $r->post('/food_trucks/create')->to(controller => 'FoodTrucks', action => 'create_food_truck');
-  $r->put('/food_trucks/:location_id')->to(controller => 'FoodTrucks', action => 'update_food_truck');
-  $r->delete('/food_trucks/:location_id')->to(controller => 'FoodTrucks', action => 'delete_food_truck');
-
+  $r->under('/food_trucks')->post('/create')->to(controller => 'FoodTrucks', action => 'create_food_truck');
+  $r->under('/food_trucks')->put('/:location_id')->to(controller => 'FoodTrucks', action => 'update_food_truck');
+  $r->under('/food_trucks')->delete('/:location_id')->to(controller => 'FoodTrucks', action => 'delete_food_truck');
 }
 
 1;
