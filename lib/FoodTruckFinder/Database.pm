@@ -13,6 +13,12 @@ sub new {
     return $self;
 }
 
+sub _connect_db {
+    my $self = shift;
+    return DBI->connect("dbi:SQLite:dbname=" . $self->{db_name},"","");
+}
+
+# Convenience functions to ensure that the values are not empty
 sub to_int {
     my $value = shift;
     return defined $value && $value =~ /\S/ ? int($value) : undef;
@@ -28,7 +34,7 @@ sub to_num {
     return defined $value && $value =~ /\S/ ? $value + 0 : 0;
 }
 
-
+# Import the food truck csv file and then insert the data into an SQLite database
 sub create_database {
     my ($self, $csv_file) = @_;
     $self->create_table();
@@ -74,6 +80,7 @@ sub create_database {
     close $fh;
 }
 
+# Create the food_trucks table if it doesn't exist
 sub create_table {
     my $self = shift;
     my $dbh = $self->_connect_db();
@@ -113,6 +120,8 @@ EOSQL
     $dbh->disconnect();
 }
 
+# Insert a food truck into the database
+# Usually only used when importing the csv file, but there is also an API endpoint to create a new food truck
 sub insert_food_truck {
     my ($self, $food_truck) = @_;
 
@@ -157,20 +166,13 @@ EOSQL
         $food_truck->neighborhoods_old
     );
 
-    # Debugging: Print the values being inserted
-    # warn "Values: ", join(", ", map { defined $_ ? $_ : 'NULL' } @values), "\n";
-
     my $result = $sth->execute(@values);
 
-    # warn "Result:", $result;
-    
-    # Debugging: Confirm that the food truck has been inserted
-    # warn "Inserted food truck: ", $food_truck->applicant, "\n";
-    
     $dbh->disconnect();
     return $result;
 }
 
+# Get all food trucks from the database
 sub get_all_food_trucks {
     my $self = shift;
     my $dbh = $self->_connect_db();
@@ -181,7 +183,6 @@ sub get_all_food_trucks {
         $sth->execute();
 
         while (my $row = $sth->fetchrow_hashref) {
-            # warn "Row: ", join(", ", map { defined $_ ? $_ : 'NULL' } values %$row); # Debugging
             push @results, FoodTruckFinder::Model::FoodTruck->new(%$row);
         }
     };
@@ -194,9 +195,9 @@ sub get_all_food_trucks {
     return @results;
 }
 
+# Get a food truck by its location_id
 sub get_food_truck_by_id {
     my ($self, $location_id) = @_;
-    # warn "Getting food truck by id:", $location_id;
     my $dbh = $self->_connect_db();
     my $food_truck;
 
@@ -219,6 +220,7 @@ sub get_food_truck_by_id {
     return $food_truck;
 }
 
+# Get a food truck by its name
 sub get_food_truck_by_name {
     my ($self, $name) = @_;
     my $dbh = $self->_connect_db();
@@ -229,7 +231,7 @@ sub get_food_truck_by_name {
         $sth->execute('%' . $name . '%');
         
         while (my $row = $sth->fetchrow_hashref) {
-            push @results, $row #FoodTruckFinder::Model::FoodTruck->new(%$row);
+            push @results, $row
         }
     };
 
@@ -237,11 +239,10 @@ sub get_food_truck_by_name {
         warn "Error fetching food truck by name: $@";
     }
     $dbh->disconnect();
-    # dump(@results);
     return @results;
 }
 
-
+# Update a food truck by its location_id
 sub update_food_truck {
     my ($self, $location_id, $food_truck_input) = @_;
     my $existing_truck = $self->get_food_truck_by_id($location_id);
@@ -270,6 +271,7 @@ EOSQL
     return $food_truck;
 }
 
+# Delete a food truck by its location_id
 sub delete_food_truck {
     my ($self, $location_id) = @_;
     my $existing_truck = $self->get_food_truck_by_id($location_id);
@@ -280,11 +282,6 @@ sub delete_food_truck {
     $sth->execute($location_id);
     $dbh->disconnect();
     return 1;
-}
-
-sub _connect_db {
-    my $self = shift;
-    return DBI->connect("dbi:SQLite:dbname=" . $self->{db_name},"","");
 }
 
 1;
