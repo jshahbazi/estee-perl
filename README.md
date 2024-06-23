@@ -63,6 +63,12 @@ To run the test suite:
 prove -l t
 ```
 
+Add -v for more verbose output:
+
+```
+prove -l t -v
+```
+
 If you need to debug the routes, use:
 
 ```
