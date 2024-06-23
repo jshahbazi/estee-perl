@@ -5,9 +5,6 @@ use Test::Mojo;
 use Mojolicious::Lite;
 use FindBin;
 use lib "$FindBin::Bin/../lib"; # Adjust the path to your lib directory
-use File::Temp qw(tempfile tempdir);
-use FoodTruckFinder::Database;
-use FoodTruckFinder::Model::FoodTruck;
 use Test::Number::Delta within => 1e-6;
 
 # Test::Mojo object
@@ -247,7 +244,7 @@ my $closest_trucks = $response->{closest_trucks};
 is(scalar @$closest_trucks, 3, 'Correct number of closest trucks');
 
 
-# Test 2: Invalid address
+# Test Invalid address
 $t->get_ok('/food_trucks/closest?address=Invalid Address')
   ->status_is(400)
   ->json_is('/error', 'Invalid address');
