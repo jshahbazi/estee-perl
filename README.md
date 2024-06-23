@@ -41,6 +41,8 @@ Create a `food_truck_finder.conf` file in the project root directory with the fo
 }
 ```
 
+Note that this isn't actually used for anything at the moment, but I wanted to include it for completeness.
+
 Replace `'your_secret_key_here'` with a secure random string.
 
 ## Running the Application
