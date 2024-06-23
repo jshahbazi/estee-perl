@@ -128,7 +128,30 @@ Example response:
         "status": "APPROVED"
       }
     },
-    // ... two more trucks
+    {
+      "distance": 0.0222907660097768,
+      "truck": {
+        "applicant": "Truck Name",
+        "address": "123 Food St",
+        "food_items": "Hot Dogs, Burgers",
+        "latitude": 37.123456,
+        "longitude": -122.654321,
+        "schedule": "Mon-Fri 10am-3pm",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "distance": 0.0222907660097768,
+      "truck": {
+        "applicant": "Truck Name",
+        "address": "123 Food St",
+        "food_items": "Hot Dogs, Burgers",
+        "latitude": 37.123456,
+        "longitude": -122.654321,
+        "schedule": "Mon-Fri 10am-3pm",
+        "status": "APPROVED"
+      }
+    },    
   ]
 }
 ```
