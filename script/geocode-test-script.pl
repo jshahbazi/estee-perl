@@ -1,5 +1,6 @@
 use Mojo::UserAgent;
 
+# This is a simple test script to verify that the geocode function works by testing the Nominatim API
 my $ua = Mojo::UserAgent->new;
 my $tx = $ua->get('http://nominatim.openstreetmap.org');
 if (my $res = $tx->result) {
